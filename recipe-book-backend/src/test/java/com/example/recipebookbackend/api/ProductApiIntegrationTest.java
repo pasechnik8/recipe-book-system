@@ -153,9 +153,9 @@ class ProductApiIntegrationTest extends BaseApiIntegrationTest {
         String request = productJson(
                 "Некорректный продукт",
                 300.0,
-                60.0,
+                50.0,
                 30.0,
-                20.0,
+                20.1,
                 "VEGETABLES",
                 "READY_TO_EAT",
                 List.of()
@@ -166,6 +166,29 @@ class ProductApiIntegrationTest extends BaseApiIntegrationTest {
                         .content(request))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.details[0]").value(containsStringIgnoringCase("БЖУ")));
+    }
+
+    @Test
+    @DisplayName("POST /api/products должен принять продукт с суммой БЖУ 99.9")
+    void shouldAcceptProductWithBjuSum99Point9() throws Exception {
+        String request = productJson(
+                "Продукт почти на границе",
+                400.0,
+                50.0,
+                30.0,
+                19.9,
+                "VEGETABLES",
+                "READY_TO_EAT",
+                List.of()
+        );
+
+        mockMvc.perform(post("/api/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.proteins").value(50.0))
+                .andExpect(jsonPath("$.fats").value(30.0))
+                .andExpect(jsonPath("$.carbs").value(19.9));
     }
 
     @Test
